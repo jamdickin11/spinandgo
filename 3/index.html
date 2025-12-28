@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Go Poker Coach</title>
+    <style>
+        :root {
+            --primary: #FF4757;
+            --primary-dark: #FF3838;
+            --secondary: #2ED573;
+            --dark-bg: #1A1D29;
+            --dark-card: #252837;
+            --darker-card: #1E202E;
+            --text: #F1F2F6;
+            --text-secondary: #A4B0BE;
+            --border: #2F3542;
+            --call-color: #2ED573;
+            --fold-color: #FF6B81;
+            --raise-color: #FFA502;
+            --allin-color: #FF4757;
+            --btn-color: #3742FA;
+            --sb-color: #5352ED;
+            --bb-color: #3742FA;
+            --success: #2ED573;
+            --warning: #FFA502;
+            --danger: #FF4757;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0F1525 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: var(--dark-card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel-title {
+            font-size: 22px;
+            margin-bottom: 25px;
+            color: var(--text);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        /* POSITION SELECTION - SIMPLIFIED */
+        .position-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .position-option {
+            flex: 1;
+            padding: 15px 5px;
+            background: var(--darker-card);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .position-option:hover {
+            transform: translateY(-2px);
+        }
+        
+        .position-option.active {
+            border-color: var(--primary);
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .position-option[data-position="BTN"] {
+            background: var(--btn-color);
+        }
+        
+        .position-option[data-position="SB"] {
+            background: var(--sb-color);
+        }
+        
+        .position-option[data-position="BB"] {
+            background: var(--bb-color);
+        }
+        
+        /* STACK INPUT - FIXED */
+        .stack-input-container {
+            background: var(--darker-card);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stack-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .stack-slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .stack-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 3px solid white;
+        }
+        
+        .stack-slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: 3px solid white;
+        }
+        
+        .stack-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* OTHER INPUTS */
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--darker-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* QUICK HANDS */
+        .quick-hands {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .quick-hand {
+            padding: 10px;
+            background: var(--darker-card);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .quick-hand:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        /* ACTION BUTTON */
+        .action-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        }
+        
+        /* RESULTS PANEL */
+        .result-hand {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            color: var(--text);
+        }
+        
+        .situation-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-box {
+            background: var(--darker-card);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .recommendation-box {
+            background: var(--darker-card);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .recommendation-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-action {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 15px 0;
+        }
+        
+        .action-allin { color: var(--allin-color); }
+        .action-call { color: var(--call-color); }
+        .action-raise { color: var(--raise-color); }
+        .action-fold { color: var(--fold-color); }
+        
+        /* CHARTS PANEL */
+        .charts-container {
+            margin-top: 30px;
+        }
+        
+        .chart-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-button {
+            padding: 10px 15px;
+            background: var(--darker-card);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 2px solid transparent;
+        }
+        
+        .chart-button:hover, .chart-button.active {
+            border-color: var(--primary);
+        }
+        
+        .chart-display {
+            background: var(--darker-card);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chart-placeholder {
+            color: var(--text-secondary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT PANEL: INPUTS -->
+        <div class="panel">
+            <h2 class="panel-title">🎮 Game Situation</h2>
+            
+            <!-- POSITION SELECTION -->
+            <div class="input-group">
+                <div class="input-label">Your Position</div>
+                <div class="position-selector">
+                    <div class="position-option active" data-position="BTN">BTN<br><small>Button</small></div>
+                    <div class="position-option" data-position="SB">SB<br><small>Small Blind</small></div>
+                    <div class="position-option" data-position="BB">BB<br><small>Big Blind</small></div>
+                </div>
+            </div>
+            
+            <!-- STACK SIZE - FIXED VERSION -->
+            <div class="input-group">
+                <div class="input-label">Stack Size (BB)</div>
+                <div class="stack-input-container">
+                    <div class="stack-display" id="stackValue">16 BB</div>
+                    <input type="range" class="stack-slider" id="stackSlider" min="5" max="30" value="16" step="1">
+                    <div class="stack-labels">
+                        <span>5</span>
+                        <span>10</span>
+                        <span>15</span>
+                        <span>20</span>
+                        <span>25</span>
+                        <span>30</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GAME STAGE -->
+            <div class="input-group">
+                <div class="input-label">Game Stage</div>
+                <select id="gameStage">
+                    <option value="3way">3-Handed (3W)</option>
+                    <option value="HU">Heads-Up (HU)</option>
+                </select>
+            </div>
+            
+            <!-- ACTION FACING -->
+            <div class="input-group">
+                <div class="input-label">Action Facing</div>
+                <select id="actionFacing">
+                    <option value="Fold">Fold to you (Open)</option>
+                    <option value="Limp">Limp</option>
+                    <option value="MR" selected>Min-Raise (2x)</option>
+                    <option value="25x">Raise 2.5x</option>
+                    <option value="3x">Raise 3x</option>
+                    <option value="AI">All-In</option>
+                </select>
+            </div>
+            
+            <!-- HAND INPUT -->
+            <div class="input-group">
+                <div class="input-label">Your Hand</div>
+                <input type="text" id="handInput" placeholder="Enter hand (e.g., AKs, QJo, 77)" value="K8s">
+            </div>
+            
+            <!-- QUICK HANDS -->
+            <div class="input-label">Quick Hands</div>
+            <div class="quick-hands">
+                <div class="quick-hand" data-hand="AA">AA</div>
+                <div class="quick-hand" data-hand="AKs">AKs</div>
+                <div class="quick-hand" data-hand="QQ">QQ</div>
+                <div class="quick-hand" data-hand="A5s">A5s</div>
+                <div class="quick-hand" data-hand="K8s">K8s</div>
+                <div class="quick-hand" data-hand="QJo">QJo</div>
+                <div class="quick-hand" data-hand="JTs">JTs</div>
+                <div class="quick-hand" data-hand="77">77</div>
+            </div>
+            
+            <!-- GET ADVICE BUTTON -->
+            <button class="action-button" id="getAdviceBtn">
+                🎯 GET POKER ADVICE
+            </button>
+        </div>
+        
+        <!-- RIGHT PANEL: RESULTS -->
+        <div class="panel">
+            <h2 class="panel-title">📊 Recommendation</h2>
+            
+            <!-- HAND DISPLAY -->
+            <div class="result-hand" id="resultHand">K8s</div>
+            
+            <!-- SITUATION DETAILS -->
+            <div class="situation-details">
+                <div class="detail-box">
+                    <div class="detail-label">Position</div>
+                    <div class="detail-value" id="detailPosition">BTN</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Stack</div>
+                    <div class="detail-value" id="detailStack">16 BB</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Stage</div>
+                    <div class="detail-value" id="detailStage">3-Handed</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Facing</div>
+                    <div class="detail-value" id="detailAction">Min-Raise</div>
+                </div>
+            </div>
+            
+            <!-- RECOMMENDATION -->
+            <div class="recommendation-box">
+                <div class="recommendation-label">CHART RECOMMENDATION</div>
+                <div class="recommendation-action action-call" id="recommendationAction">
+                    CALL
+                </div>
+                <div id="recommendationExplanation" style="color: var(--text-secondary);">
+                    According to 3W_SBvsBU_MR_16-20BB chart
+                </div>
+            </div>
+            
+            <!-- CHARTS SELECTOR -->
+            <div class="charts-container">
+                <div class="input-label">Available Charts</div>
+                <div class="chart-buttons" id="chartButtons">
+                    <!-- Charts will be added by JavaScript -->
+                </div>
+                <div class="chart-display">
+                    <div class="chart-placeholder" id="chartPlaceholder">
+                        Select a chart to view hand ranges
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 1. CHART DATABASE
+        // ============================================
+        const chartDatabase = {
+            "3W_SBvsBU_MR_16-20BB": {
+                name: "3W - SB vs BU Min-Raise (16-20BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "AKs": "ALL-IN",
+                    "AQs": "ALL-IN", "AJs": "CALL", "ATs": "CALL", "A9s": "CALL",
+                    "A8s": "CALL", "A7s": "CALL", "A6s": "CALL", "A5s": "CALL",
+                    "A4s": "CALL", "A3s": "CALL", "A2s": "CALL", "KQs": "CALL",
+                    "KJs": "CALL", "KTs": "CALL", "K9s": "CALL", "K8s": "CALL",
+                    "K7s": "CALL", "K6s": "CALL", "QJs": "CALL", "QTs": "CALL",
+                    "Q9s": "CALL", "JTs": "CALL", "J9s": "CALL", "T9s": "CALL",
+                    "98s": "CALL", "87s": "CALL", "76s": "CALL", "65s": "CALL",
+                    "54s": "CALL", "AKo": "ALL-IN", "AQo": "ALL-IN", "AJo": "CALL",
+                    "ATo": "CALL", "KQo": "CALL", "QJo": "FOLD", "JTo": "FOLD"
+                }
+            },
+            "3W_SBvsBU_MR_13-16BB": {
+                name: "3W - SB vs BU Min-Raise (13-16BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "AKs": "ALL-IN",
+                    "AQs": "ALL-IN", "AJs": "ALL-IN", "ATs": "ALL-IN", "A9s": "ALL-IN",
+                    "A8s": "CALL", "A7s": "CALL", "A6s": "CALL", "A5s": "ALL-IN",
+                    "A4s": "CALL", "A3s": "CALL", "A2s": "CALL", "KQs": "ALL-IN",
+                    "KJs": "CALL", "KTs": "CALL", "K9s": "CALL", "K8s": "FOLD",
+                    "K7s": "FOLD", "QJs": "CALL", "QTs": "CALL", "Q9s": "CALL",
+                    "JTs": "CALL", "J9s": "CALL", "T9s": "CALL", "98s": "CALL",
+                    "87s": "CALL", "76s": "CALL", "65s": "CALL", "54s": "CALL",
+                    "AKo": "ALL-IN", "AQo": "ALL-IN", "AJo": "ALL-IN", "ATo": "CALL",
+                    "KQo": "CALL", "QJo": "FOLD", "JTo": "FOLD"
+                }
+            },
+            "HU_BBvsSB_MR_13-16BB": {
+                name: "HU - BB vs SB Min-Raise (13-16BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "77": "ALL-IN",
+                    "66": "CALL", "55": "CALL", "44": "CALL", "33": "CALL",
+                    "22": "CALL", "AKs": "ALL-IN", "AQs": "ALL-IN", "AJs": "ALL-IN",
+                    "ATs": "ALL-IN", "A9s": "ALL-IN", "A8s": "ALL-IN", "A7s": "CALL",
+                    "A6s": "CALL", "A5s": "CALL", "A4s": "CALL", "A3s": "CALL",
+                    "A2s": "CALL", "KQs": "ALL-IN", "KJs": "ALL-IN", "KTs": "ALL-IN",
+                    "K9s": "CALL", "K8s": "CALL", "K7s": "CALL", "K6s": "CALL",
+                    "K5s": "CALL", "K4s": "CALL", "K3s": "CALL", "K2s": "CALL",
+                    "QJs": "ALL-IN", "QTs": "CALL", "Q9s": "CALL", "Q8s": "CALL",
+                    "JTs": "CALL", "J9s": "CALL", "J8s": "CALL", "T9s": "CALL",
+                    "T8s": "CALL", "98s": "CALL", "97s": "CALL", "87s": "CALL",
+                    "86s": "CALL", "76s": "CALL", "75s": "CALL", "65s": "CALL",
+                    "64s": "CALL", "54s": "CALL", "53s": "CALL", "AKo": "ALL-IN",
+                    "AQo": "ALL-IN", "AJo": "ALL-IN", "ATo": "CALL", "A9o": "CALL",
+                    "KQo": "ALL-IN", "KJo": "CALL", "KTo": "CALL", "QJo": "CALL",
+                    "QTo": "CALL", "JTo": "CALL", "T9o": "CALL", "98o": "CALL"
+                }
+            },
+            "3W_BU_13-16BB": {
+                name: "3W - Button Open (13-16BB)",
+                hands: {
+                    "AA": "RAISE", "KK": "RAISE", "QQ": "RAISE", "JJ": "RAISE",
+                    "TT": "RAISE", "99": "RAISE", "88": "RAISE", "77": "RAISE",
+                    "66": "RAISE", "55": "RAISE", "44": "RAISE", "33": "RAISE",
+                    "22": "RAISE", "AKs": "RAISE", "AQs": "RAISE", "AJs": "RAISE",
+                    "ATs": "RAISE", "A9s": "RAISE", "A8s": "RAISE", "A7s": "RAISE",
+                    "A6s": "RAISE", "A5s": "RAISE", "A4s": "RAISE", "A3s": "RAISE",
+                    "A2s": "RAISE", "KQs": "RAISE", "KJs": "RAISE", "KTs": "RAISE",
+                    "K9s": "RAISE", "K8s": "RAISE", "K7s": "RAISE", "K6s": "RAISE",
+                    "K5s": "RAISE", "K4s": "RAISE", "K3s": "RAISE", "K2s": "RAISE",
+                    "QJs": "RAISE", "QTs": "RAISE", "Q9s": "RAISE", "Q8s": "RAISE",
+                    "JTs": "RAISE", "J9s": "RAISE", "J8s": "RAISE", "T9s": "RAISE",
+                    "T8s": "RAISE", "98s": "RAISE", "97s": "RAISE", "87s": "RAISE",
+                    "86s": "RAISE", "76s": "RAISE", "75s": "RAISE", "65s": "RAISE",
+                    "64s": "RAISE", "54s": "RAISE", "53s": "RAISE", "43s": "RAISE",
+                    "AKo": "RAISE", "AQo": "RAISE", "AJo": "RAISE", "ATo": "RAISE",
+                    "KQo": "RAISE", "KJo": "RAISE", "KTo": "RAISE", "QJo": "RAISE",
+                    "QTo": "RAISE", "JTo": "RAISE", "T9o": "RAISE", "98o": "RAISE"
+                }
+            },
+            "HU_SB_7-9BB_fish": {
+                name: "HU - SB Shove vs Fish (7-9BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "77": "ALL-IN",
+                    "66": "ALL-IN", "55": "ALL-IN", "44": "ALL-IN", "33": "ALL-IN",
+                    "22": "ALL-IN", "AKs": "ALL-IN", "AQs": "ALL-IN", "AJs": "ALL-IN",
+                    "ATs": "ALL-IN", "A9s": "ALL-IN", "A8s": "ALL-IN", "A7s": "ALL-IN",
+                    "A6s": "ALL-IN", "A5s": "ALL-IN", "A4s": "ALL-IN", "A3s": "ALL-IN",
+                    "A2s": "ALL-IN", "KQs": "ALL-IN", "KJs": "ALL-IN", "KTs": "ALL-IN",
+                    "K9s": "ALL-IN", "K8s": "ALL-IN", "K7s": "ALL-IN", "K6s": "ALL-IN",
+                    "K5s": "ALL-IN", "K4s": "ALL-IN", "K3s": "ALL-IN", "K2s": "ALL-IN",
+                    "QJs": "ALL-IN", "QTs": "ALL-IN", "Q9s": "ALL-IN", "Q8s": "ALL-IN",
+                    "JTs": "ALL-IN", "J9s": "ALL-IN", "J8s": "ALL-IN", "T9s": "ALL-IN",
+                    "T8s": "ALL-IN", "98s": "ALL-IN", "97s": "ALL-IN", "87s": "ALL-IN",
+                    "86s": "ALL-IN", "76s": "ALL-IN", "75s": "ALL-IN", "65s": "ALL-IN",
+                    "64s": "ALL-IN", "54s": "ALL-IN", "53s": "ALL-IN", "43s": "ALL-IN",
+                    "AKo": "ALL-IN", "AQo": "ALL-IN", "AJo": "ALL-IN", "ATo": "ALL-IN",
+                    "A9o": "ALL-IN", "KQo": "ALL-IN", "KJo": "ALL-IN", "KTo": "ALL-IN",
+                    "QJo": "ALL-IN", "QTo": "ALL-IN", "JTo": "ALL-IN", "T9o": "ALL-IN"
+                }
+            }
+        };
+
+        // ============================================
+        // 2. INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize position buttons
+            initPositionButtons();
+            
+            // Initialize stack slider
+            initStackSlider();
+            
+            // Initialize quick hands
+            initQuickHands();
+            
+            // Initialize chart buttons
+            initChartButtons();
+            
+            // Get initial advice
+            getAdvice();
+        });
+
+        // ============================================
+        // 3. UI INITIALIZATION FUNCTIONS
+        // ============================================
+        function initPositionButtons() {
+            const positionOptions = document.querySelectorAll('.position-option');
+            positionOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all
+                    positionOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active to clicked
+                    this.classList.add('active');
+                    // Get advice
+                    getAdvice();
+                });
+            });
+        }
+
+        function initStackSlider() {
+            const stackSlider = document.getElementById('stackSlider');
+            const stackValue = document.getElementById('stackValue');
+            
+            // Update display when slider moves
+            stackSlider.addEventListener('input', function() {
+                stackValue.textContent = this.value + ' BB';
+                getAdvice();
+            });
+            
+            // Also update on change (when mouse is released)
+            stackSlider.addEventListener('change', function() {
+                stackValue.textContent = this.value + ' BB';
+                getAdvice();
+            });
+        }
+
+        function initQuickHands() {
+            const quickHands = document.querySelectorAll('.quick-hand');
+            const handInput = document.getElementById('handInput');
+            
+            quickHands.forEach(hand => {
+                hand.addEventListener('click', function() {
+                    const handValue = this.getAttribute('data-hand');
+                    handInput.value = handValue;
+                    getAdvice();
+                });
+            });
+        }
+
+        function initChartButtons() {
+            const chartButtons = document.getElementById('chartButtons');
+            
+            // Clear existing buttons
+            chartButtons.innerHTML = '';
+            
+            // Create buttons for each chart
+            for (const chartKey in chartDatabase) {
+                const chart = chartDatabase[chartKey];
+                const button = document.createElement('div');
+                button.className = 'chart-button';
+                button.textContent = chart.name;
+                button.setAttribute('data-chart', chartKey);
+                
+                button.addEventListener('click', function() {
+                    // Remove active class from all
+                    document.querySelectorAll('.chart-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // Add active to clicked
+                    this.classList.add('active');
+                    // Display chart
+                    displayChart(chartKey);
+                });
+                
+                chartButtons.appendChild(button);
+            }
+            
+            // Activate first chart
+            if (chartButtons.firstChild) {
+                chartButtons.firstChild.classList.add('active');
+                displayChart(chartButtons.firstChild.getAttribute('data-chart'));
+            }
+        }
+
+        // ============================================
+        // 4. CORE LOGIC FUNCTIONS
+        // ============================================
+        function getCurrentPosition() {
+            const activeOption = document.querySelector('.position-option.active');
+            return activeOption ? activeOption.getAttribute('data-position') : 'BTN';
+        }
+
+        function getRecommendation(position, stack, stage, action, hand) {
+            // Normalize hand input
+            hand = hand.toUpperCase().trim();
+            
+            // Build chart key based on inputs
+            let chartKey = '';
+            
+            // 3-Handed rules
+            if (stage === '3way') {
+                if (position === 'SB' && action === 'MR') {
+                    if (stack >= 16 && stack <= 20) {
+                        chartKey = '3W_SBvsBU_MR_16-20BB';
+                    } else if (stack >= 13 && stack < 16) {
+                        chartKey = '3W_SBvsBU_MR_13-16BB';
+                    }
+                } else if (position === 'BTN' && action === 'Fold') {
+                    if (stack >= 13 && stack <= 16) {
+                        chartKey = '3W_BU_13-16BB';
+                    }
+                }
+            }
+            
+            // Heads-Up rules
+            if (stage === 'HU') {
+                if (position === 'BB' && action === 'MR') {
+                    if (stack >= 13 && stack <= 16) {
+                        chartKey = 'HU_BBvsSB_MR_13-16BB';
+                    }
+                } else if (position === 'SB' && stack >= 7 && stack <= 9) {
+                    chartKey = 'HU_SB_7-9BB_fish';
+                }
+            }
+            
+            // If no chart found, use first available
+            if (!chartKey) {
+                chartKey = Object.keys(chartDatabase)[0];
+            }
+            
+            // Get recommendation from chart
+            const chart = chartDatabase[chartKey];
+            let recommendation = chart.hands[hand];
+            
+            // If hand not found in chart, default to FOLD
+            if (!recommendation) {
+                recommendation = 'FOLD';
+            }
+            
+            return {
+                hand: hand,
+                position: position,
+                stack: stack,
+                stage: stage,
+                action: action,
+                recommendation: recommendation,
+                chartKey: chartKey,
+                chartName: chart.name
+            };
+        }
+
+        // ============================================
+        // 5. MAIN FUNCTION TO GET ADVICE
+        // ============================================
+        function getAdvice() {
+            // Get current inputs
+            const position = getCurrentPosition();
+            const stack = parseInt(document.getElementById('stackSlider').value);
+            const stage = document.getElementById('gameStage').value;
+            const action = document.getElementById('actionFacing').value;
+            const hand = document.getElementById('handInput').value;
+            
+            // Validate hand
+            if (!hand || hand.trim() === '') {
+                showError('Please enter a hand (e.g., AKs, QJo, 77)');
+                return;
+            }
+            
+            // Get recommendation
+            const result = getRecommendation(position, stack, stage, action, hand);
+            
+            // Update UI with results
+            updateResultsUI(result);
+        }
+
+        function updateResultsUI(result) {
+            // Update hand display
+            document.getElementById('resultHand').textContent = result.hand;
+            
+            // Update details
+            document.getElementById('detailPosition').textContent = result.position;
+            document.getElementById('detailStack').textContent = result.stack + ' BB';
+            document.getElementById('detailStage').textContent = result.stage === '3way' ? '3-Handed' : 'Heads-Up';
+            document.getElementById('detailAction').textContent = getActionName(result.action);
+            
+            // Update recommendation
+            const recommendationEl = document.getElementById('recommendationAction');
+            recommendationEl.textContent = result.recommendation;
+            
+            // Set color based on action
+            recommendationEl.className = 'recommendation-action';
+            if (result.recommendation.includes('ALL-IN')) {
+                recommendationEl.classList.add('action-allin');
+            } else if (result.recommendation.includes('CALL')) {
+                recommendationEl.classList.add('action-call');
+            } else if (result.recommendation.includes('RAISE')) {
+                recommendationEl.classList.add('action-raise');
+            } else if (result.recommendation.includes('FOLD')) {
+                recommendationEl.classList.add('action-fold');
+            }
+            
+            // Update explanation
+            document.getElementById('recommendationExplanation').textContent = 
+                `According to ${result.chartName}`;
+            
+            // Highlight corresponding chart
+            highlightChart(result.chartKey);
+        }
+
+        function displayChart(chartKey) {
+            const chart = chartDatabase[chartKey];
+            const chartPlaceholder = document.getElementById('chartPlaceholder');
+            
+            if (!chart) return;
+            
+            // Create visual representation of the chart
+            let chartHTML = `<h3 style="margin-bottom: 15px; color: var(--text);">${chart.name}</h3>`;
+            
+            // Group hands by action
+            const actions = {};
+            for (const [hand, action] of Object.entries(chart.hands)) {
+                if (!actions[action]) actions[action] = [];
+                actions[action].push(hand);
+            }
+            
+            // Display hands grouped by action
+            for (const [action, hands] of Object.entries(actions)) {
+                let actionColor;
+                if (action.includes('ALL-IN')) actionColor = 'var(--allin-color)';
+                else if (action.includes('CALL')) actionColor = 'var(--call-color)';
+                else if (action.includes('RAISE')) actionColor = 'var(--raise-color)';
+                else actionColor = 'var(--fold-color)';
+                
+                chartHTML += `
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                            <div style="width: 10px; height: 10px; background: ${actionColor}; border-radius: 50%; margin-right: 8px;"></div>
+                            <h4 style="color: ${actionColor}; font-size: 14px; font-weight: 600;">${action} (${hands.length} hands)</h4>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px; font-size: 12px;">
+                `;
+                
+                // Sort hands for better display
+                hands.sort();
+                
+                for (const hand of hands) {
+                    chartHTML += `<div style="background: var(--dark-card); padding: 4px 8px; border-radius: 4px;">${hand}</div>`;
+                }
+                
+                chartHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartPlaceholder.innerHTML = chartHTML;
+        }
+
+        function highlightChart(chartKey) {
+            // Remove active class from all chart buttons
+            document.querySelectorAll('.chart-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to matching chart
+            const matchingBtn = document.querySelector(`.chart-button[data-chart="${chartKey}"]`);
+            if (matchingBtn) {
+                matchingBtn.classList.add('active');
+                displayChart(chartKey);
+            }
+        }
+
+        // ============================================
+        // 6. HELPER FUNCTIONS
+        // ============================================
+        function getActionName(actionCode) {
+            const actionMap = {
+                'Fold': 'Fold',
+                'Limp': 'Limp',
+                'MR': 'Min-Raise',
+                '25x': 'Raise 2.5x',
+                '3x': 'Raise 3x',
+                'AI': 'All-In'
+            };
+            return actionMap[actionCode] || actionCode;
+        }
+
+        function showError(message) {
+            const recommendationBox = document.querySelector('.recommendation-box');
+            recommendationBox.innerHTML = `
+                <div style="color: var(--danger); text-align: center;">
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // 7. EVENT LISTENERS
+        // ============================================
+        // Get advice button
+        document.getElementById('getAdviceBtn').addEventListener('click', getAdvice);
+        
+        // Game stage change
+        document.getElementById('gameStage').addEventListener('change', getAdvice);
+        
+        // Action facing change
+        document.getElementById('actionFacing').addEventListener('change', getAdvice);
+        
+        // Hand input - get advice on Enter key
+        document.getElementById('handInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getAdvice();
+            }
+        });
+        
+        // Hand input - also get advice when focus is lost
+        document.getElementById('handInput').addEventListener('blur', getAdvice);
+    </script>
+</body>
+</html>
