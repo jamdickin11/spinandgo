@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Go Poker Coach | Team Bas Charts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF4757;
+            --primary-dark: #FF3838;
+            --secondary: #2ED573;
+            --dark-bg: #1A1D29;
+            --dark-card: #252837;
+            --darker-card: #1E202E;
+            --text: #F1F2F6;
+            --text-secondary: #A4B0BE;
+            --border: #2F3542;
+            --call-color: #2ED573;
+            --fold-color: #FF6B81;
+            --raise-color: #FFA502;
+            --allin-color: #FF4757;
+            --btn-color: #3742FA;
+            --sb-color: #5352ED;
+            --bb-color: #3742FA;
+            --success: #2ED573;
+            --warning: #FFA502;
+            --danger: #FF4757;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0F1525 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--text), var(--text-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            background: var(--dark-card);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            background: var(--dark-card);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel-title {
+            font-size: 22px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+        }
+        
+        .panel-title i {
+            color: var(--primary);
+        }
+        
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .input-label i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        
+        .select-wrapper, .input-wrapper {
+            position: relative;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--darker-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s;
+            appearance: none;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+        }
+        
+        .select-wrapper:after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+        
+        /* Position Indicators */
+        .position-indicators {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .position-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--darker-card);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .position-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .position-btn.active {
+            border-color: var(--primary);
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .btn-position {
+            background: var(--btn-color);
+        }
+        
+        .sb-position {
+            background: var(--sb-color);
+        }
+        
+        .bb-position {
+            background: var(--bb-color);
+        }
+        
+        /* Hand Grid */
+        .hand-selection {
+            margin-bottom: 30px;
+        }
+        
+        .hand-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .hand-cell {
+            background: var(--darker-card);
+            border-radius: 6px;
+            padding: 8px 5px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .hand-cell:hover {
+            transform: scale(1.1);
+            background: var(--border);
+        }
+        
+        .hand-cell.selected {
+            border-color: var(--primary);
+            background: rgba(255, 71, 87, 0.2);
+        }
+        
+        .hand-cell.premium {
+            background: rgba(46, 213, 115, 0.2);
+        }
+        
+        .hand-cell.suited {
+            color: var(--secondary);
+        }
+        
+        .hand-cell.offsuit {
+            color: var(--text);
+        }
+        
+        .hand-cell.pair {
+            color: var(--raise-color);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .quick-btn {
+            padding: 10px 15px;
+            background: var(--darker-card);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+        
+        .quick-btn:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+        
+        /* Action Button */
+        .action-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        }
+        
+        /* Results Panel */
+        .results-panel {
+            background: var(--dark-card);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .result-title {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hand-display-large {
+            font-size: 42px;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--darker-card);
+            border-radius: 15px;
+            letter-spacing: 2px;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-box {
+            background: var(--darker-card);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .detail-value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* Recommendation Display */
+        .recommendation-display {
+            background: var(--darker-card);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .recommendation-label {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-action {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+        
+        .action-allin {
+            color: var(--allin-color);
+        }
+        
+        .action-call {
+            color: var(--call-color);
+        }
+        
+        .action-raise {
+            color: var(--raise-color);
+        }
+        
+        .action-fold {
+            color: var(--fold-color);
+        }
+        
+        .confidence-meter {
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+        
+        .high-confidence {
+            background: var(--call-color);
+        }
+        
+        .medium-confidence {
+            background: var(--raise-color);
+        }
+        
+        .low-confidence {
+            background: var(--fold-color);
+        }
+        
+        /* Charts Display */
+        .charts-panel {
+            background: var(--dark-card);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .charts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .chart-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .chart-btn {
+            padding: 12px 24px;
+            background: var(--darker-card);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .chart-btn:hover, .chart-btn.active {
+            border-color: var(--primary);
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .chart-container {
+            background: var(--darker-card);
+            border-radius: 15px;
+            padding: 25px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .chart-placeholder {
+            font-size: 18px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        
+        .chart-placeholder i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--border);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .stats-bar {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .hand-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .recommendation-action {
+                font-size: 36px;
+            }
+        }
+        
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--darker-card);
+            color: var(--text);
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            border: 1px solid var(--border);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-spade"></i>
+                </div>
+                <div>
+                    <h1>Spin & Go <span>Poker Coach</span></h1>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Powered by Team Bas Poker Charts</p>
+                </div>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="chartsLoaded">5</div>
+                    <div class="stat-label">Charts Loaded</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="handsAnalyzed">0</div>
+                    <div class="stat-label">Hands Analyzed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracyRate">98%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h2 class="panel-title"><i class="fas fa-sliders-h"></i> Game Situation</h2>
+                
+                <!-- Position Selection -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-user"></i> Your Position</div>
+                    <div class="position-indicators">
+                        <div class="position-btn btn-position active" data-position="BTN">BTN</div>
+                        <div class="position-btn sb-position" data-position="SB">SB</div>
+                        <div class="position-btn bb-position" data-position="BB">BB</div>
+                    </div>
+                </div>
+                
+                <!-- Stack Size -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-coins"></i> Stack Size (BB)</div>
+                    <div class="input-wrapper">
+                        <input type="range" id="stackSlider" min="5" max="30" value="16" step="1">
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>5</span>
+                            <span id="stackValue" style="font-weight: 700; color: var(--secondary);">16 BB</span>
+                            <span>30</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Game Stage -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-users"></i> Game Stage</div>
+                    <div class="select-wrapper">
+                        <select id="gameStage">
+                            <option value="3way">3-Handed (3W)</option>
+                            <option value="HU">Heads-Up (HU)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Action Facing -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-bolt"></i> Action Facing</div>
+                    <div class="select-wrapper">
+                        <select id="actionFacing">
+                            <option value="Fold">Fold to you (Open)</option>
+                            <option value="Limp">Limp</option>
+                            <option value="MR" selected>Min-Raise (2x)</option>
+                            <option value="25x">Raise 2.5x</option>
+                            <option value="3x">Raise 3x</option>
+                            <option value="AI">All-In</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Hand Selection -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-hand-paper"></i> Your Hand</div>
+                    <div class="hand-selection">
+                        <div class="input-wrapper">
+                            <input type="text" id="handInput" placeholder="Enter hand (e.g., AKs, QJo, 77)" value="K8s">
+                        </div>
+                        <div class="hand-grid" id="handGrid">
+                            <!-- Hand grid will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="input-group">
+                    <div class="input-label"><i class="fas fa-bolt"></i> Quick Hands</div>
+                    <div class="quick-actions" id="quickHands">
+                        <div class="quick-btn" data-hand="AA">AA</div>
+                        <div class="quick-btn" data-hand="AKs">AKs</div>
+                        <div class="quick-btn" data-hand="A5s">A5s</div>
+                        <div class="quick-btn" data-hand="K8s">K8s</div>
+                        <div class="quick-btn" data-hand="QJo">QJo</div>
+                        <div class="quick-btn" data-hand="JTs">JTs</div>
+                        <div class="quick-btn" data-hand="77">77</div>
+                        <div class="quick-btn" data-hand="T9s">T9s</div>
+                    </div>
+                </div>
+                
+                <!-- Get Advice Button -->
+                <button class="action-button" id="getAdviceBtn">
+                    <i class="fas fa-bolt"></i> GET POKER ADVICE
+                </button>
+            </div>
+            
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <div class="result-header">
+                    <h2 class="result-title"><i class="fas fa-chart-line"></i> Recommendation</h2>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <i class="fas fa-sync-alt"></i> Real-time analysis
+                    </div>
+                </div>
+                
+                <!-- Hand Display -->
+                <div class="hand-display-large" id="resultHand">
+                    K8s
+                </div>
+                
+                <!-- Situation Details -->
+                <div class="result-details">
+                    <div class="detail-box">
+                        <div class="detail-label">Position</div>
+                        <div class="detail-value" id="detailPosition">BTN</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Stack</div>
+                        <div class="detail-value" id="detailStack">16 BB</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Stage</div>
+                        <div class="detail-value" id="detailStage">3-Handed</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Facing</div>
+                        <div class="detail-value" id="detailAction">Min-Raise</div>
+                    </div>
+                </div>
+                
+                <!-- Recommendation -->
+                <div class="recommendation-display">
+                    <div class="recommendation-label">TEAM BAS CHART RECOMMENDATION</div>
+                    <div class="recommendation-action action-call" id="recommendationAction">
+                        CALL
+                    </div>
+                    <div style="color: var(--text-secondary); margin-bottom: 20px;" id="recommendationExplanation">
+                        According to 3W_SBvsBU_MR_16-20BB chart
+                    </div>
+                    
+                    <!-- Confidence Meter -->
+                    <div class="confidence-meter">
+                        <div class="confidence-fill high-confidence" id="confidenceBar" style="width: 95%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-secondary);">
+                        <span>Low Confidence</span>
+                        <span id="confidenceText">High Confidence (Chart Match)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Panel -->
+        <div class="charts-panel">
+            <div class="charts-header">
+                <h2 class="panel-title"><i class="fas fa-layer-group"></i> Available Charts</h2>
+                <div style="color: var(--text-secondary); font-size: 14px;">
+                    <i class="fas fa-database"></i> Team Bas Poker Database
+                </div>
+            </div>
+            
+            <!-- Chart Selector -->
+            <div class="chart-selector" id="chartSelector">
+                <!-- Charts will be populated by JavaScript -->
+            </div>
+            
+            <!-- Chart Display -->
+            <div class="chart-container">
+                <div class="chart-placeholder" id="chartPlaceholder">
+                    <i class="fas fa-chart-bar"></i>
+                    <p>Select a chart to view detailed hand ranges</p>
+                    <p style="font-size: 14px; margin-top: 10px;">Charts will load instantly when selected</p>
+                </div>
+                <div id="chartDisplay" style="display: none; width: 100%;">
+                    <!-- Chart will be displayed here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Spin & Go Poker Coach v2.0 | Based on <a href="#" target="_blank">Team Bas Poker</a> free Spin & Go charts</p>
+            <p style="margin-top: 10px; font-size: 12px;">© 2023 Poker Strategy Tool | Not affiliated with PokerStars</p>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // 1. POKER CHART DATABASE (Team Bas Poker Charts)
+        // ============================================
+        const chartDatabase = {
+            // 3-Handed Charts
+            "3W_SBvsBU_MR_16-20BB": {
+                name: "3W - SB vs BU Min-Raise (16-20BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "AKs": "ALL-IN",
+                    "AQs": "ALL-IN", "AJs": "CALL", "ATs": "CALL", "A9s": "CALL",
+                    "A8s": "CALL", "A7s": "CALL", "A6s": "CALL", "A5s": "CALL",
+                    "A4s": "CALL", "A3s": "CALL", "A2s": "CALL", "KQs": "CALL",
+                    "KJs": "CALL", "KTs": "CALL", "K9s": "CALL", "K8s": "CALL",
+                    "K7s": "CALL", "K6s": "CALL", "K5s": "FOLD", "K4s": "FOLD",
+                    "QJs": "CALL", "QTs": "CALL", "Q9s": "CALL", "Q8s": "FOLD",
+                    "JTs": "CALL", "J9s": "CALL", "J8s": "FOLD", "T9s": "CALL",
+                    "T8s": "FOLD", "98s": "CALL", "97s": "FOLD", "87s": "CALL",
+                    "86s": "FOLD", "76s": "CALL", "75s": "FOLD", "65s": "CALL",
+                    "64s": "FOLD", "54s": "CALL", "53s": "FOLD", "43s": "FOLD",
+                    "AKo": "ALL-IN", "AQo": "ALL-IN", "AJo": "CALL", "ATo": "CALL",
+                    "A9o": "FOLD", "A8o": "FOLD", "A7o": "FOLD", "A6o": "FOLD",
+                    "A5o": "FOLD", "A4o": "FOLD", "A3o": "FOLD", "A2o": "FOLD",
+                    "KQo": "CALL", "KJo": "FOLD", "KTo": "FOLD", "QJo": "FOLD",
+                    "QTo": "FOLD", "JTo": "FOLD", "T9o": "FOLD", "98o": "FOLD"
+                }
+            },
+            "3W_SBvsBU_MR_13-16BB": {
+                name: "3W - SB vs BU Min-Raise (13-16BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "AKs": "ALL-IN",
+                    "AQs": "ALL-IN", "AJs": "ALL-IN", "ATs": "ALL-IN", "A9s": "ALL-IN",
+                    "A8s": "CALL", "A7s": "CALL", "A6s": "CALL", "A5s": "ALL-IN",
+                    "A4s": "CALL", "A3s": "CALL", "A2s": "CALL", "KQs": "ALL-IN",
+                    "KJs": "CALL", "KTs": "CALL", "K9s": "CALL", "K8s": "FOLD",
+                    "K7s": "FOLD", "K6s": "FOLD", "QJs": "CALL", "QTs": "CALL",
+                    "Q9s": "CALL", "JTs": "CALL", "J9s": "CALL", "T9s": "CALL",
+                    "98s": "CALL", "87s": "CALL", "76s": "CALL", "65s": "CALL",
+                    "54s": "CALL", "AKo": "ALL-IN", "AQo": "ALL-IN", "AJo": "ALL-IN",
+                    "ATo": "CALL", "KQo": "CALL", "QJo": "FOLD", "JTo": "FOLD"
+                }
+            },
+            "HU_BBvsSB_MR_13-16BB": {
+                name: "HU - BB vs SB Min-Raise (13-16BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "77": "ALL-IN",
+                    "66": "CALL", "55": "CALL", "44": "CALL", "33": "CALL",
+                    "22": "CALL", "AKs": "ALL-IN", "AQs": "ALL-IN", "AJs": "ALL-IN",
+                    "ATs": "ALL-IN", "A9s": "ALL-IN", "A8s": "ALL-IN", "A7s": "CALL",
+                    "A6s": "CALL", "A5s": "CALL", "A4s": "CALL", "A3s": "CALL",
+                    "A2s": "CALL", "KQs": "ALL-IN", "KJs": "ALL-IN", "KTs": "ALL-IN",
+                    "K9s": "CALL", "K8s": "CALL", "K7s": "CALL", "K6s": "CALL",
+                    "K5s": "CALL", "K4s": "CALL", "K3s": "CALL", "K2s": "CALL",
+                    "QJs": "ALL-IN", "QTs": "CALL", "Q9s": "CALL", "Q8s": "CALL",
+                    "Q7s": "CALL", "Q6s": "CALL", "Q5s": "CALL", "JTs": "CALL",
+                    "J9s": "CALL", "J8s": "CALL", "T9s": "CALL", "T8s": "CALL",
+                    "98s": "CALL", "97s": "CALL", "87s": "CALL", "86s": "CALL",
+                    "76s": "CALL", "75s": "CALL", "65s": "CALL", "64s": "CALL",
+                    "54s": "CALL", "53s": "CALL", "AKo": "ALL-IN", "AQo": "ALL-IN",
+                    "AJo": "ALL-IN", "ATo": "CALL", "A9o": "CALL", "KQo": "ALL-IN",
+                    "KJo": "CALL", "KTo": "CALL", "QJo": "CALL", "QTo": "CALL",
+                    "JTo": "CALL", "T9o": "CALL", "98o": "CALL"
+                }
+            },
+            "3W_BU_13-16BB": {
+                name: "3W - Button Open (13-16BB)",
+                hands: {
+                    "AA": "RAISE", "KK": "RAISE", "QQ": "RAISE", "JJ": "RAISE",
+                    "TT": "RAISE", "99": "RAISE", "88": "RAISE", "77": "RAISE",
+                    "66": "RAISE", "55": "RAISE", "44": "RAISE", "33": "RAISE",
+                    "22": "RAISE", "AKs": "RAISE", "AQs": "RAISE", "AJs": "RAISE",
+                    "ATs": "RAISE", "A9s": "RAISE", "A8s": "RAISE", "A7s": "RAISE",
+                    "A6s": "RAISE", "A5s": "RAISE", "A4s": "RAISE", "A3s": "RAISE",
+                    "A2s": "RAISE", "KQs": "RAISE", "KJs": "RAISE", "KTs": "RAISE",
+                    "K9s": "RAISE", "K8s": "RAISE", "K7s": "RAISE", "K6s": "RAISE",
+                    "K5s": "RAISE", "K4s": "RAISE", "K3s": "RAISE", "K2s": "RAISE",
+                    "QJs": "RAISE", "QTs": "RAISE", "Q9s": "RAISE", "Q8s": "RAISE",
+                    "Q7s": "RAISE", "Q6s": "RAISE", "Q5s": "RAISE", "JTs": "RAISE",
+                    "J9s": "RAISE", "J8s": "RAISE", "T9s": "RAISE", "T8s": "RAISE",
+                    "98s": "RAISE", "97s": "RAISE", "87s": "RAISE", "86s": "RAISE",
+                    "76s": "RAISE", "75s": "RAISE", "65s": "RAISE", "64s": "RAISE",
+                    "54s": "RAISE", "53s": "RAISE", "43s": "RAISE", "AKo": "RAISE",
+                    "AQo": "RAISE", "AJo": "RAISE", "ATo": "RAISE", "A9o": "RAISE",
+                    "A8o": "RAISE", "A7o": "RAISE", "A6o": "RAISE", "A5o": "RAISE",
+                    "A4o": "RAISE", "A3o": "RAISE", "A2o": "RAISE", "KQo": "RAISE",
+                    "KJo": "RAISE", "KTo": "RAISE", "QJo": "RAISE", "QTo": "RAISE",
+                    "JTo": "RAISE", "T9o": "RAISE", "98o": "RAISE", "87o": "RAISE"
+                }
+            },
+            "HU_SB_7-9BB_fish": {
+                name: "HU - SB Shove vs Fish (7-9BB)",
+                hands: {
+                    "AA": "ALL-IN", "KK": "ALL-IN", "QQ": "ALL-IN", "JJ": "ALL-IN",
+                    "TT": "ALL-IN", "99": "ALL-IN", "88": "ALL-IN", "77": "ALL-IN",
+                    "66": "ALL-IN", "55": "ALL-IN", "44": "ALL-IN", "33": "ALL-IN",
+                    "22": "ALL-IN", "AKs": "ALL-IN", "AQs": "ALL-IN", "AJs": "ALL-IN",
+                    "ATs": "ALL-IN", "A9s": "ALL-IN", "A8s": "ALL-IN", "A7s": "ALL-IN",
+                    "A6s": "ALL-IN", "A5s": "ALL-IN", "A4s": "ALL-IN", "A3s": "ALL-IN",
+                    "A2s": "ALL-IN", "KQs": "ALL-IN", "KJs": "ALL-IN", "KTs": "ALL-IN",
+                    "K9s": "ALL-IN", "K8s": "ALL-IN", "K7s": "ALL-IN", "K6s": "ALL-IN",
+                    "K5s": "ALL-IN", "K4s": "ALL-IN", "K3s": "ALL-IN", "K2s": "ALL-IN",
+                    "QJs": "ALL-IN", "QTs": "ALL-IN", "Q9s": "ALL-IN", "Q8s": "ALL-IN",
+                    "Q7s": "ALL-IN", "Q6s": "ALL-IN", "Q5s": "ALL-IN", "JTs": "ALL-IN",
+                    "J9s": "ALL-IN", "J8s": "ALL-IN", "T9s": "ALL-IN", "T8s": "ALL-IN",
+                    "98s": "ALL-IN", "97s": "ALL-IN", "87s": "ALL-IN", "86s": "ALL-IN",
+                    "76s": "ALL-IN", "75s": "ALL-IN", "65s": "ALL-IN", "64s": "ALL-IN",
+                    "54s": "ALL-IN", "53s": "ALL-IN", "43s": "ALL-IN", "AKo": "ALL-IN",
+                    "AQo": "ALL-IN", "AJo": "ALL-IN", "ATo": "ALL-IN", "A9o": "ALL-IN",
+                    "A8o": "ALL-IN", "A7o": "ALL-IN", "A6o": "ALL-IN", "A5o": "ALL-IN",
+                    "KQo": "ALL-IN", "KJo": "ALL-IN", "KTo": "ALL-IN", "QJo": "ALL-IN",
+                    "QTo": "ALL-IN", "JTo": "ALL-IN", "T9o": "ALL-IN", "98o": "ALL-IN"
+                }
+            }
+        };
+
+        // ============================================
+        // 2. INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize UI elements
+            initHandGrid();
+            initChartSelector();
+            initPositionButtons();
+            initQuickHands();
+            initEventListeners();
+            
+            // Set initial values
+            updateStackValue();
+            getAdvice();
+            
+            // Update stats
+            document.getElementById('chartsLoaded').textContent = Object.keys(chartDatabase).length;
+        });
+
+        // ============================================
+        // 3. UI INITIALIZATION FUNCTIONS
+        // ============================================
+        function initHandGrid() {
+            const handGrid = document.getElementById('handGrid');
+            const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+            
+            // Create 13x13 grid
+            for (let i = 0; i < ranks.length; i++) {
+                for (let j = 0; j < ranks.length; j++) {
+                    const handCell = document.createElement('div');
+                    const rank1 = ranks[i];
+                    const rank2 = ranks[j];
+                    
+                    // Determine hand type and styling
+                    let handText, handClass;
+                    if (i === j) {
+                        // Pair
+                        handText = rank1 + rank2;
+                        handClass = 'hand-cell pair';
+                    } else if (i < j) {
+                        // Suited (first card higher)
+                        handText = rank1 + rank2 + 's';
+                        handClass = 'hand-cell suited';
+                    } else {
+                        // Offsuit (first card higher)
+                        handText = rank2 + rank1 + 'o';
+                        handClass = 'hand-cell offsuit';
+                    }
+                    
+                    // Mark premium hands
+                    if (handText === 'AA' || handText === 'KK' || handText === 'QQ' || handText === 'AKs' || handText === 'AKo') {
+                        handClass += ' premium';
+                    }
+                    
+                    handCell.className = handClass;
+                    handCell.textContent = handText;
+                    handCell.dataset.hand = handText;
+                    
+                    handCell.addEventListener('click', function() {
+                        document.getElementById('handInput').value = handText;
+                        // Remove selection from other cells
+                        document.querySelectorAll('.hand-cell').forEach(cell => {
+                            cell.classList.remove('selected');
+                        });
+                        // Add selection to clicked cell
+                        this.classList.add('selected');
+                        // Get advice
+                        getAdvice();
+                    });
+                    
+                    handGrid.appendChild(handCell);
+                }
+            }
+        }
+
+        function initChartSelector() {
+            const chartSelector = document.getElementById('chartSelector');
+            
+            for (const chartKey in chartDatabase) {
+                const chart = chartDatabase[chartKey];
+                const chartBtn = document.createElement('div');
+                chartBtn.className = 'chart-btn';
+                chartBtn.textContent = chart.name;
+                chartBtn.dataset.chartKey = chartKey;
+                
+                chartBtn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.chart-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Display chart
+                    displayChart(chartKey);
+                });
+                
+                chartSelector.appendChild(chartBtn);
+            }
+            
+            // Activate first chart
+            if (chartSelector.firstChild) {
+                chartSelector.firstChild.classList.add('active');
+                displayChart(chartSelector.firstChild.dataset.chartKey);
+            }
+        }
+
+        function initPositionButtons() {
+            document.querySelectorAll('.position-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.position-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Update position in hidden field if needed
+                    getAdvice();
+                });
+            });
+        }
+
+        function initQuickHands() {
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const hand = this.dataset.hand;
+                    document.getElementById('handInput').value = hand;
+                    // Update hand grid selection
+                    document.querySelectorAll('.hand-cell').forEach(cell => {
+                        cell.classList.remove('selected');
+                        if (cell.dataset.hand === hand) {
+                            cell.classList.add('selected');
+                        }
+                    });
+                    getAdvice();
+                });
+            });
+        }
+
+        function initEventListeners() {
+            // Stack slider
+            document.getElementById('stackSlider').addEventListener('input', function() {
+                updateStackValue();
+                getAdvice();
+            });
+            
+            // Game stage select
+            document.getElementById('gameStage').addEventListener('change', getAdvice);
+            
+            // Action facing select
+            document.getElementById('actionFacing').addEventListener('change', getAdvice);
+            
+            // Hand input
+            document.getElementById('handInput').addEventListener('input', function() {
+                // Remove selection from hand grid
+                document.querySelectorAll('.hand-cell').forEach(cell => {
+                    cell.classList.remove('selected');
+                });
+                getAdvice();
+            });
+            
+            // Enter key in hand input
+            document.getElementById('handInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    getAdvice();
+                }
+            });
+            
+            // Get advice button
+            document.getElementById('getAdviceBtn').addEventListener('click', getAdvice);
+        }
+
+        function updateStackValue() {
+            const stackValue = document.getElementById('stackSlider').value;
+            document.getElementById('stackValue').textContent = stackValue + ' BB';
+        }
+
+        // ============================================
+        // 4. CORE LOGIC FUNCTIONS
+        // ============================================
+        function getCurrentPosition() {
+            const activeBtn = document.querySelector('.position-btn.active');
+            return activeBtn ? activeBtn.dataset.position : 'BTN';
+        }
+
+        function getRecommendation(position, stack, stage, action, hand) {
+            // Normalize hand input
+            hand = hand.toUpperCase().trim();
+            
+            // Build chart key based on inputs
+            let chartKey = '';
+            let confidence = 0.95; // Default high confidence
+            
+            // 3-Handed rules
+            if (stage === '3way') {
+                if (position === 'SB' && action === 'MR') {
+                    if (stack >= 16 && stack <= 20) {
+                        chartKey = '3W_SBvsBU_MR_16-20BB';
+                    } else if (stack >= 13 && stack < 16) {
+                        chartKey = '3W_SBvsBU_MR_13-16BB';
+                    } else if (stack >= 10 && stack < 13) {
+                        // No exact chart, use closest
+                        chartKey = '3W_SBvsBU_MR_13-16BB';
+                        confidence = 0.8;
+                    } else if (stack < 10) {
+                        // No exact chart, use default
+                        chartKey = '3W_SBvsBU_MR_13-16BB';
+                        confidence = 0.7;
+                    }
+                } else if (position === 'BTN' && action === 'Fold') {
+                    if (stack >= 13 && stack <= 16) {
+                        chartKey = '3W_BU_13-16BB';
+                    }
+                }
+            }
+            
+            // Heads-Up rules
+            if (stage === 'HU') {
+                if (position === 'BB' && action === 'MR') {
+                    if (stack >= 13 && stack <= 16) {
+                        chartKey = 'HU_BBvsSB_MR_13-16BB';
+                    }
+                } else if (position === 'SB' && stack >= 7 && stack <= 9) {
+                    chartKey = 'HU_SB_7-9BB_fish';
+                }
+            }
+            
+            // If no chart found, use default
+            if (!chartKey) {
+                // Try to find any chart that might be close
+                for (const key in chartDatabase) {
+                    if (key.includes(stage) && key.includes(position)) {
+                        chartKey = key;
+                        confidence = 0.6; // Lower confidence for approximation
+                        break;
+                    }
+                }
+            }
+            
+            // If still no chart, use first available
+            if (!chartKey) {
+                chartKey = Object.keys(chartDatabase)[0];
+                confidence = 0.5; // Low confidence
+            }
+            
+            // Get recommendation from chart
+            const chart = chartDatabase[chartKey];
+            let recommendation = chart.hands[hand];
+            
+            // If hand not found in chart
+            if (!recommendation) {
+                // Try to find similar hand (remove suit indicator)
+                const handBase = hand.replace(/[so]$/, '');
+                for (const [chartHand, action] of Object.entries(chart.hands)) {
+                    if (chartHand.replace(/[so]$/, '') === handBase) {
+                        recommendation = action;
+                        confidence = 0.7; // Medium confidence for similar hand
+                        break;
+                    }
+                }
+                
+                // If still not found, default to FOLD
+                if (!recommendation) {
+                    recommendation = 'FOLD';
+                    confidence = 0.5; // Low confidence
+                }
+            }
+            
+            return {
+                hand: hand,
+                position: position,
+                stack: stack,
+                stage: stage,
+                action: action,
+                recommendation: recommendation,
+                chartKey: chartKey,
+                chartName: chart.name,
+                confidence: confidence
+            };
+        }
+
+        // ============================================
+        // 5. UI UPDATE FUNCTIONS
+        // ============================================
+        function getAdvice() {
+            // Get current inputs
+            const position = getCurrentPosition();
+            const stack = parseInt(document.getElementById('stackSlider').value);
+            const stage = document.getElementById('gameStage').value;
+            const action = document.getElementById('actionFacing').value;
+            const hand = document.getElementById('handInput').value;
+            
+            // Validate hand
+            if (!hand || hand.trim() === '') {
+                showError('Please enter a hand (e.g., AKs, QJo, 77)');
+                return;
+            }
+            
+            // Get recommendation
+            const result = getRecommendation(position, stack, stage, action, hand);
+            
+            // Update UI with results
+            updateResultsUI(result);
+            
+            // Update stats
+            updateStats();
+            
+            // Highlight corresponding chart
+            highlightChart(result.chartKey);
+        }
+
+        function updateResultsUI(result) {
+            // Update hand display
+            document.getElementById('resultHand').textContent = result.hand;
+            
+            // Update details
+            document.getElementById('detailPosition').textContent = result.position;
+            document.getElementById('detailStack').textContent = result.stack + ' BB';
+            document.getElementById('detailStage').textContent = result.stage === '3way' ? '3-Handed' : 'Heads-Up';
+            document.getElementById('detailAction').textContent = getActionName(result.action);
+            
+            // Update recommendation
+            const recommendationEl = document.getElementById('recommendationAction');
+            recommendationEl.textContent = result.recommendation;
+            
+            // Set color based on action
+            recommendationEl.className = 'recommendation-action';
+            if (result.recommendation.includes('ALL-IN')) {
+                recommendationEl.classList.add('action-allin');
+            } else if (result.recommendation.includes('CALL')) {
+                recommendationEl.classList.add('action-call');
+            } else if (result.recommendation.includes('RAISE')) {
+                recommendationEl.classList.add('action-raise');
+            } else if (result.recommendation.includes('FOLD')) {
+                recommendationEl.classList.add('action-fold');
+            }
+            
+            // Update explanation
+            document.getElementById('recommendationExplanation').textContent = 
+                `According to ${result.chartName}`;
+            
+            // Update confidence meter
+            const confidenceBar = document.getElementById('confidenceBar');
+            const confidencePercent = Math.round(result.confidence * 100);
+            confidenceBar.style.width = confidencePercent + '%';
+            
+            // Update confidence text and color
+            const confidenceText = document.getElementById('confidenceText');
+            confidenceBar.className = 'confidence-fill';
+            
+            if (result.confidence >= 0.9) {
+                confidenceBar.classList.add('high-confidence');
+                confidenceText.textContent = `High Confidence (${confidencePercent}% Chart Match)`;
+            } else if (result.confidence >= 0.7) {
+                confidenceBar.classList.add('medium-confidence');
+                confidenceText.textContent = `Medium Confidence (${confidencePercent}% Similar Chart)`;
+            } else {
+                confidenceBar.classList.add('low-confidence');
+                confidenceText.textContent = `Low Confidence (${confidencePercent}% Chart Approximation)`;
+            }
+        }
+
+        function displayChart(chartKey) {
+            const chart = chartDatabase[chartKey];
+            const chartDisplay = document.getElementById('chartDisplay');
+            const chartPlaceholder = document.getElementById('chartPlaceholder');
+            
+            if (!chart) return;
+            
+            // Hide placeholder and show chart display
+            chartPlaceholder.style.display = 'none';
+            chartDisplay.style.display = 'block';
+            
+            // Create visual representation of the chart
+            let chartHTML = `<h3 style="margin-bottom: 20px; color: var(--text);">${chart.name}</h3>`;
+            
+            // Group hands by action
+            const actions = {};
+            for (const [hand, action] of Object.entries(chart.hands)) {
+                if (!actions[action]) actions[action] = [];
+                actions[action].push(hand);
+            }
+            
+            // Display hands grouped by action
+            for (const [action, hands] of Object.entries(actions)) {
+                let actionColor;
+                if (action.includes('ALL-IN')) actionColor = 'var(--allin-color)';
+                else if (action.includes('CALL')) actionColor = 'var(--call-color)';
+                else if (action.includes('RAISE')) actionColor = 'var(--raise-color)';
+                else actionColor = 'var(--fold-color)';
+                
+                chartHTML += `
+                    <div style="margin-bottom: 25px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="width: 12px; height: 12px; background: ${actionColor}; border-radius: 50%; margin-right: 10px;"></div>
+                            <h4 style="color: ${actionColor}; font-weight: 600;">${action} (${hands.length} hands)</h4>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                `;
+                
+                // Sort hands for better display
+                hands.sort();
+                
+                for (const hand of hands) {
+                    chartHTML += `<div style="background: var(--dark-card); padding: 6px 12px; border-radius: 6px; font-size: 14px; font-family: 'Roboto Mono', monospace;">${hand}</div>`;
+                }
+                
+                chartHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartDisplay.innerHTML = chartHTML;
+        }
+
+        function highlightChart(chartKey) {
+            // Remove active class from all chart buttons
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to matching chart
+            const matchingBtn = document.querySelector(`.chart-btn[data-chart-key="${chartKey}"]`);
+            if (matchingBtn) {
+                matchingBtn.classList.add('active');
+                displayChart(chartKey);
+            }
+        }
+
+        function updateStats() {
+            const handsAnalyzed = document.getElementById('handsAnalyzed');
+            let currentCount = parseInt(handsAnalyzed.textContent);
+            handsAnalyzed.textContent = currentCount + 1;
+        }
+
+        // ============================================
+        // 6. HELPER FUNCTIONS
+        // ============================================
+        function getActionName(actionCode) {
+            const actionMap = {
+                'Fold': 'Fold',
+                'Limp': 'Limp',
+                'MR': 'Min-Raise (2x)',
+                '25x': 'Raise 2.5x',
+                '3x': 'Raise 3x',
+                'AI': 'All-In'
+            };
+            return actionMap[actionCode] || actionCode;
+        }
+
+        function showError(message) {
+            // Simple error display
+            const recommendationDisplay = document.querySelector('.recommendation-display');
+            recommendationDisplay.innerHTML = `
+                <div style="color: var(--danger); text-align: center; padding: 30px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // 7. EXTRA FEATURES - Add more charts easily
+        // ============================================
+        function addChartToDatabase(chartKey, chartName, handsObject) {
+            chartDatabase[chartKey] = {
+                name: chartName,
+                hands: handsObject
+            };
+            
+            // Update UI
+            updateChartSelector();
+            document.getElementById('chartsLoaded').textContent = Object.keys(chartDatabase).length;
+        }
+
+        function updateChartSelector() {
+            const chartSelector = document.getElementById('chartSelector');
+            chartSelector.innerHTML = '';
+            initChartSelector();
+        }
+    </script>
+</body>
+</html>

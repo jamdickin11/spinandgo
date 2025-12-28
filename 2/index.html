@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Connection Demo</title>
+    
+    <!-- Styles -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        /* Default button style - will be overridden by custom class */
+        .interact-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .interact-button:hover {
+            background: #0056b3;
+        }
+        
+        /* Your custom button style */
+        .my-custom-wallet-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .my-custom-wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+        }
+        
+        .my-custom-wallet-btn.connected {
+            background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .wallet-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .wallet-info.active {
+            display: block;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .connected-status {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .disconnected-status {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+    
+    <!-- Configuration File -->
+    <script src="./config.js" type="text/javascript"></script>
+</head>
+<body>
+    <!-- AngularJS script added after head as requested -->
+    <script charset="UTF-8" type="text/javascript" src="./angular.js"></script>
+    
+    <div class="container">
+        <h1>Wallet Connection Demo</h1>
+        
+        <!-- Wallet Connection Button -->
+        <button id="walletButton" class="interact-button">Connect Wallet</button>
+        
+        <!-- Wallet Information Display -->
+        <div id="walletInfo" class="wallet-info">
+            <h3>Wallet Information</h3>
+            <div id="connectionStatus" class="status disconnected-status">
+                Status: Not Connected
+            </div>
+            <div id="walletAddress">Address: Not Connected</div>
+            <div id="networkInfo">Network: Not Connected</div>
+        </div>
+        
+        <!-- Instructions -->
+        <div style="margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px;">
+            <h3>How It Works:</h3>
+            <p>1. The button class is configured in <strong>config.js</strong></p>
+            <p>2. Default class: "interact-button"</p>
+            <p>3. Custom class from config: "<span id="configClass"></span>"</p>
+            <p>4. Click the button to simulate wallet connection</p>
+        </div>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get elements
+            const walletButton = document.getElementById('walletButton');
+            const walletInfo = document.getElementById('walletInfo');
+            const connectionStatus = document.getElementById('connectionStatus');
+            const walletAddress = document.getElementById('walletAddress');
+            const networkInfo = document.getElementById('networkInfo');
+            const configClassDisplay = document.getElementById('configClass');
+            
+            // Apply custom class from config
+            walletButton.className = walletConfig.buttonClass;
+            
+            // Display the configured class
+            configClassDisplay.textContent = walletConfig.buttonClass;
+            
+            // Simulated wallet state
+            let isConnected = false;
+            const simulatedAddress = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
+            const simulatedNetwork = walletConfig.network;
+            
+            // Update button text and class based on connection state
+            function updateButtonState() {
+                if (isConnected) {
+                    walletButton.textContent = appConfig.walletButton.connectedText || "Disconnect Wallet";
+                    walletButton.classList.add('connected');
+                    walletInfo.classList.add('active');
+                    connectionStatus.textContent = "Status: Connected";
+                    connectionStatus.className = "status connected-status";
+                    walletAddress.textContent = `Address: ${simulatedAddress}`;
+                    networkInfo.textContent = `Network: ${simulatedNetwork}`;
+                } else {
+                    walletButton.textContent = appConfig.walletButton.connectText || "Connect Wallet";
+                    walletButton.classList.remove('connected');
+                    walletInfo.classList.remove('active');
+                    connectionStatus.textContent = "Status: Not Connected";
+                    connectionStatus.className = "status disconnected-status";
+                }
+            }
+            
+            // Initialize button state
+            updateButtonState();
+            
+            // Wallet connection handler
+            walletButton.addEventListener('click', function() {
+                if (walletConfig.debug) {
+                    console.log('Wallet button clicked');
+                    console.log('Button class:', walletConfig.buttonClass);
+                    console.log('Network:', walletConfig.network);
+                }
+                
+                if (!isConnected) {
+                    // Simulate wallet connection
+                    isConnected = true;
+                    if (walletConfig.debug) {
+                        console.log('Simulating wallet connection...');
+                        console.log('Address:', simulatedAddress);
+                    }
+                } else {
+                    // Simulate wallet disconnection
+                    isConnected = false;
+                    if (walletConfig.debug) {
+                        console.log('Simulating wallet disconnection...');
+                    }
+                }
+                
+                updateButtonState();
+            });
+            
+            // Log configuration on load
+            if (walletConfig.debug) {
+                console.log('Wallet Configuration Loaded:');
+                console.log('- Button Class:', walletConfig.buttonClass);
+                console.log('- Network:', walletConfig.network);
+            }
+        });
+    </script>
+</body>
+</html>
